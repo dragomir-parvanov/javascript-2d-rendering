@@ -1,4 +1,3 @@
-
 function getRenderList()
 {
      // TODO: map size 
@@ -16,7 +15,7 @@ function getRenderList()
 	 obj[1] = {x: 4900, y: 5200, path: "image.png", renderSizeX: renderSizeX, renderSizeY: renderSizeY, collisionSizeX: collisionSizeX, collisionSizeY: collisionSizeY};
 	 obj[2] = {x: x, y: y, path: "jpg1.jpg", renderSizeX: renderSizeX, renderSizeY: renderSizeY, collisionSizeX: collisionSizeX, collisionSizeY: collisionSizeY};
 	 obj[3] = {x: 5500, y: 5600, path: "image.png", renderSizeX: renderSizeX, renderSizeY: renderSizeY, collisionSizeX: collisionSizeX, collisionSizeY: collisionSizeY};
-	 obj[4] = {x: 4600, y: 5400, path: "image.png", renderSizeX: renderSizeX, renderSizeY: renderSizeY, collisionSizeX: collisionSizeX, collisionSizeY: collisionSizeY};
+	 obj[4] = {x: 4000, y: 5400, path: "image.png", renderSizeX: 2000, renderSizeY: 500, collisionSizeX: 2000, collisionSizeY: 500};
 	 renderList.push(obj[0]); 
 	 renderList.push(obj[1]); 
 	 renderList.push(obj[2]); 
@@ -26,8 +25,11 @@ function getRenderList()
 	 }
 
 
+var collisionTest=false;
+//Client web dimensions
+var clientWindowWidth = window.screen.availWidth;
+var clientWindowHeight = window.screen.availHeight;
 
- 
 //starting position
 var playerX =5000;
 var playerY =5000;
@@ -36,14 +38,35 @@ const playerViewFovX = 1920;
 const playerViewFovY = 1080;
 //movement speed
 var movementSpeed = 0.5;
+// shooting range
+var shootRange = 10;
 ////fps max per second // DESIRED FPS DIVIDED BY 1000
 const fpsMax = 17; 
 movementSpeed *=fpsMax;
-
+var clicked = 0;
 var renderList = [];
 getRenderList();
 var here = false;
 var test = 0;
+ 
+
+//update method for each called frame
+
+function update() {
+    
+  
+console.log(`PlayerX=${playerX} PlayerY=${playerY}`);
+	
+
+checkRender();
+   
+keyUpdate();  
+
+console.log(here);
+}
+ setInterval(update, fpsMax);
+
+ //rendering
  function checkRender()
  {
 var stringRender = " ";
@@ -64,9 +87,9 @@ for(let i = 0;i<renderList.length;i++)
 	if(renderList[i].y+renderList[i].renderSizeY>playerY-playerViewFovY/2 && renderList[i].y-renderList[i].renderSizeY/2<playerY+playerViewFovY/2)
 		{
 			console.log(renderList[i].path);
-			
-			let xRender = (renderList[i].x-playerX)+playerViewFovX/2;
-			let yRender = (renderList[i].y-playerY)+playerViewFovY/2;
+			//some sorcery going on                  it was playerViewFovX/2 before
+			let xRender = ((renderList[i].x-playerX)+clientWindowWidth/2)-renderList[i].renderSizeX/2;
+			let yRender = ((renderList[i].y-playerY)+clientWindowHeight/2)-renderList[i].renderSizeY/2;
 			let stringInput =`<img style="width:${renderList[i].renderSizeX}px;height:${renderList[i].renderSizeY}px;position:fixed;top:${yRender}px;right:${xRender}px;" src="${renderList[i].path}">`;
 		 stringRender= stringRender + stringInput;	 
 		 collisionEntities.push(renderList[i]);
@@ -77,22 +100,6 @@ for(let i = 0;i<renderList.length;i++)
 }
 document.getElementById("imgr").innerHTML=stringRender;
 }
-
-//update method for each called frame
-
-function update() {
-    
-  
-console.log(`PlayerX=${playerX} PlayerY=${playerY}`);
-	
-keyUpdate();
-checkRender();
-   
-   
- 
-}
- setInterval(update, fpsMax);
-
  //collision function
  function collisionX(id,lenght,rightOrLeft){
 	 
@@ -118,7 +125,7 @@ checkRender();
 					 remainingMovements = lenght-(objectXCollision+renderList[i].collisionSizeX/2);
 						if(objectX>renderList[i].x)
 						{
-							remainingMovements=movementSpeed;
+							remainingMovements=lenght;
 						}						
 						if(remainingMovements<0)
 						{
@@ -150,11 +157,12 @@ checkRender();
 	 
 	 if (typeof remainingMovements === 'undefined')
 	 {
-		 remainingMovements=movementSpeed;
+		 remainingMovements=lenght;
 	 }
  return remainingMovements;
  }
-function collisionY(id,lenght,topOrBottom){
+ 
+ function collisionY(id,lenght,topOrBottom){
  let objectX = renderList[id].x;
 	 let objectY = renderList[id].y;
 	 
@@ -185,7 +193,7 @@ function collisionY(id,lenght,topOrBottom){
 						}
 						if(objectY>renderList[i].y)
 						{
-							remainingMovements=movementSpeed;
+							remainingMovements=lenght;
 						}
 						if(remainingMovements<0)
 						{
@@ -217,15 +225,15 @@ function collisionY(id,lenght,topOrBottom){
 	 
 	 if (typeof remainingMovements === 'undefined')
 	 {
-		 remainingMovements=movementSpeed;
+		 remainingMovements=lenght;
 	 }
  return remainingMovements;
  }	
 	 
 //control functions
+
 document.addEventListener('keydown', keyDownHandler, false);
 document.addEventListener('keyup', keyUpHandler, false);
-
 var rightPressed = false;
 var leftPressed = false;
 var upPressed = false;
@@ -260,6 +268,7 @@ function keyUpHandler(event) {
     	upPressed = false;
     }
 }
+
 function keyUpdate()
 {
 	 //Control update
@@ -283,7 +292,15 @@ function keyUpdate()
     }
 	// end control update
 }
-//end of rendering part
-			//collision functions
+// mouse functions
+function OnMouseClick(event) {
+ 
+  let mouseX = event.clientX;
+  let mouseY = event.clientY;
+  
+  
+}
+
+document.addEventListener("click", OnMouseClick);
 			
 			
